@@ -555,6 +555,9 @@ public class FakeNewsReportService {
         if (reportOpt.isPresent()) {
             FakeNewsReport report = reportOpt.get();
             report.setStatus(ReportStatus.IN_PROGRESS);
+            if (report.getDetectionResult() == null || report.getDetectionScore() == null) {
+                analyzeAndSetReportDetection(report);
+            }
             reportRepository.save(report);
         }
     }

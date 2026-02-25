@@ -23,7 +23,6 @@ public class AdminController {
     public String dashboard(Model model) {
         List<FakeNewsReport> pendingReports = reportService.getPendingReports();
         List<FakeNewsReport> inProgressReports = reportService.getInProgressReports();
-        reportService.enrichReportsWithAiDetection(pendingReports);
         reportService.enrichReportsWithAiDetection(inProgressReports);
         List<FakeNewsReport> approvedReports = reportService.getApprovedReports();
         List<FakeNewsReport> rejectedReports = reportService.getRejectedReports();
