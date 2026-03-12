@@ -167,6 +167,51 @@ Run the JAR:
 java -jar target/fake-news-reporter-1.0.0.jar
 ```
 
+## SigNoz Log Integration
+
+This project includes scripts for sending application logs to SigNoz with OpenTelemetry Java Agent.
+
+1. Start SigNoz (self-hosted):
+```powershell
+.\scripts\start-signoz.ps1
+```
+SigNoz UI: `http://localhost:3301`
+
+2. Download the OpenTelemetry Java agent:
+```powershell
+.\monitoring\download-otel-agent.ps1
+```
+
+3. Start the app with log export enabled:
+```powershell
+.\scripts\run-signoz.ps1
+```
+
+4. Generate quick test traffic (to create logs):
+```powershell
+.\scripts\verify-signoz.ps1
+```
+
+If you run with Docker Compose, use the SigNoz override file:
+```powershell
+docker compose -f docker-compose.yml -f docker-compose.signoz.yml up --build
+```
+
+Optional parameters:
+```powershell
+.\scripts\run-signoz.ps1 -Profile local -ServiceName fake-news-reporter -OtlpEndpoint http://localhost:4317 -OtlpProtocol grpc
+```
+
+For SigNoz Cloud, set ingestion key first:
+```powershell
+$env:SIGNOZ_INGESTION_KEY="your_ingestion_key"
+.\scripts\run-signoz.ps1 -OtlpEndpoint https://ingest.<region>.signoz.cloud:443
+```
+
+Verify in SigNoz UI:
+- Open `Logs`
+- Filter by `service.name=fake-news-reporter`
+
 ## Environment Variables (Production)
 
 - `SPRING_PROFILE` - Active profile (prod)
@@ -183,6 +228,33 @@ Local example (PowerShell):
 $env:HUGGINGFACE_API_TOKEN="hf_xxx_your_token_here"
 mvn spring-boot:run
 ```
+
+## SBOM + Dependency-Track (Varianta A)
+
+1. Genereaza SBOM-ul CycloneDX:
+```bash
+mvn clean compile
+mvn cyclonedx:makeAggregateBom
+```
+Fisierele rezultate sunt `target/sbom.json` si `target/sbom.xml`.
+
+2. Porneste Dependency-Track:
+```bash
+docker compose -f docker-compose.dtrack.yml up -d
+```
+Interfata web: `http://localhost:8082` (user/parola initiale: `admin` / `admin`).
+
+3. Upload SBOM (Varianta A - UI):
+- Intra in UI -> `Projects` -> `Create Project`
+- Intra in proiect -> `Components` -> `Upload BOM`
+- Selecteaza `target/sbom.json`
+
+4. Verificare vulnerabilitati:
+- `Dashboard`: numar vulnerabilitati pe severitate
+- `Project -> Vulnerabilities`: CVE-urile detectate
+- `Project -> Components`: dependintele inventariate
+
+Pentru ghid extins vezi `SBOM-DEPENDENCY-TRACK.md`.
 
 ## Security Notes
 

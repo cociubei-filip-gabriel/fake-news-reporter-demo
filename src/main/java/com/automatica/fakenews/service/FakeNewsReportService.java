@@ -6,8 +6,10 @@ import com.automatica.fakenews.model.FakeNewsReport;
 import com.automatica.fakenews.model.ReportStatus;
 import com.automatica.fakenews.repository.FakeNewsReportRepository;
 import jakarta.annotation.PostConstruct;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
@@ -503,6 +505,9 @@ public class FakeNewsReportService {
             }
         }
         return count;
+    }
+
+    public void rejectReport(long l, String admin) {
     }
 
     private record AnalysisOutcome(String label, double score, String provider, String details) {

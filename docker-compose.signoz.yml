@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  app:
+    environment:
+      JAVA_TOOL_OPTIONS: >-
+        -javaagent:/app/monitoring/opentelemetry-javaagent.jar
+        -Dotel.service.name=${OTEL_SERVICE_NAME:-fake-news-reporter}
+        -Dotel.logs.exporter=otlp
+        -Dotel.metrics.exporter=otlp
+        -Dotel.traces.exporter=otlp
+        -Dotel.exporter.otlp.endpoint=${OTEL_EXPORTER_OTLP_ENDPOINT:-http://host.docker.internal:4317}
+        -Dotel.exporter.otlp.protocol=${OTEL_EXPORTER_OTLP_PROTOCOL:-grpc}
+        -Dotel.resource.attributes=deployment.environment=${SPRING_PROFILE:-prod}
+        -Dotel.exporter.otlp.headers=${OTEL_EXPORTER_OTLP_HEADERS:-}
+    volumes:
+      - ./monitoring/opentelemetry-javaagent.jar:/app/monitoring/opentelemetry-javaagent.jar:ro

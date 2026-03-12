@@ -4,7 +4,8 @@ import com.automatica.fakenews.dto.ReportForm;
 import com.automatica.fakenews.model.FakeNewsReport;
 import com.automatica.fakenews.service.FakeNewsReportService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -18,6 +19,7 @@ import java.util.List;
 @Controller
 public class HomeController {
 
+    private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
     private final FakeNewsReportService reportService;
 
     public HomeController(FakeNewsReportService reportService) {
@@ -27,6 +29,7 @@ public class HomeController {
     @GetMapping("/")
     public String home(Model model) {
         List<FakeNewsReport> reports = reportService.getPublicReports();
+        logger.info("Serving home page with {} public reports", reports.size());
         model.addAttribute("reports", reports);
         return "index";
     }
@@ -34,6 +37,7 @@ public class HomeController {
     @GetMapping("/reports")
     public String reports(Model model) {
         List<FakeNewsReport> reports = reportService.getPublicReports();
+        logger.info("Serving reports page with {} public reports", reports.size());
         model.addAttribute("reports", reports);
         return "reports";
     }
@@ -50,6 +54,7 @@ public class HomeController {
                                RedirectAttributes redirectAttributes,
                                Model model) {
         if (bindingResult.hasErrors()) {
+            logger.warn("Report submission validation failed for news source '{}'", reportForm.getNewsSource());
             return "report-form";
         }
 
@@ -60,6 +65,7 @@ public class HomeController {
         report.setDescription(reportForm.getDescription());
 
         reportService.saveReport(report);
+        logger.info("New report submitted for source '{}'", report.getNewsSource());
 
         redirectAttributes.addFlashAttribute("successMessage",
             "Thank you! Your report has been submitted and is pending approval.");

@@ -3,6 +3,8 @@ package com.automatica.fakenews.controller;
 import com.automatica.fakenews.model.FakeNewsReport;
 import com.automatica.fakenews.model.ReportStatus;
 import com.automatica.fakenews.service.FakeNewsReportService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -16,6 +18,8 @@ import java.util.List;
 @RequestMapping("/admin")
 public class AdminController {
 
+    private static final Logger logger = LoggerFactory.getLogger(AdminController.class);
+
     @Autowired
     private FakeNewsReportService reportService;
 
@@ -26,6 +30,8 @@ public class AdminController {
         reportService.enrichReportsWithAiDetection(inProgressReports);
         List<FakeNewsReport> approvedReports = reportService.getApprovedReports();
         List<FakeNewsReport> rejectedReports = reportService.getRejectedReports();
+        logger.info("Admin dashboard loaded: pending={}, inProgress={}, approved={}, rejected={}",
+                pendingReports.size(), inProgressReports.size(), approvedReports.size(), rejectedReports.size());
 
         model.addAttribute("pendingReports", pendingReports);
         model.addAttribute("inProgressReports", inProgressReports);
@@ -42,6 +48,7 @@ public class AdminController {
                                      RedirectAttributes redirectAttributes) {
         String username = authentication.getName();
         ReportStatus reportStatus = ReportStatus.valueOf(status.toUpperCase());
+        logger.info("User '{}' updates report {} to status {}", username, id, reportStatus);
         reportService.setReportStatus(id, reportStatus, username);
         redirectAttributes.addFlashAttribute("successMessage", "Report status updated successfully!");
         return "redirect:/admin/dashboard";
@@ -50,6 +57,7 @@ public class AdminController {
     @PostMapping("/report/{id}/in-progress")
     public String markAsInProgress(@PathVariable Long id,
                                    RedirectAttributes redirectAttributes) {
+        logger.info("Marking report {} as in progress", id);
         reportService.setInProgressReport(id);
         redirectAttributes.addFlashAttribute("successMessage", "Report marked as in progress!");
         return "redirect:/admin/dashboard";
@@ -58,6 +66,7 @@ public class AdminController {
     @PostMapping("/delete/{id}")
     public String deleteReport(@PathVariable Long id,
                                RedirectAttributes redirectAttributes) {
+        logger.info("Deleting report {}", id);
         reportService.deleteReport(id);
         redirectAttributes.addFlashAttribute("successMessage", "Report deleted successfully!");
         return "redirect:/admin/dashboard";
